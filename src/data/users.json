@@ -1,0 +1,164 @@
+{
+    "users": [
+        {
+            "id": "1",
+            "name": "Alice Johnson",
+            "email": "alice.johnson@example.com",
+            "phone": "123-456-7890",
+            "password": "password123",
+            "role": "admin"
+        },
+        {
+            "id": "2",
+            "name": "Bob Smith",
+            "email": "bob.smith@example.com",
+            "phone": "234-567-8901",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "3",
+            "name": "Charlie Brown",
+            "email": "charlie.brown@example.com",
+            "phone": "345-678-9012",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "4",
+            "name": "David Wilson",
+            "email": "david.wilson@example.com",
+            "phone": "456-789-0123",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "5",
+            "name": "Eva Adams",
+            "email": "eva.adams@example.com",
+            "phone": "567-890-1234",
+            "password": "password123",
+            "role": "admin"
+        },
+        {
+            "id": "6",
+            "name": "Frank Miller",
+            "email": "frank.miller@example.com",
+            "phone": "678-901-2345",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "7",
+            "name": "Grace Lee",
+            "email": "grace.lee@example.com",
+            "phone": "789-012-3456",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "8",
+            "name": "Henry Davis",
+            "email": "henry.davis@example.com",
+            "phone": "890-123-4567",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "9",
+            "name": "Isabella Clark",
+            "email": "isabella.clark@example.com",
+            "phone": "901-234-5678",
+            "password": "password123",
+            "role": "admin"
+        },
+        {
+            "id": "10",
+            "name": "Jack White",
+            "email": "jack.white@example.com",
+            "phone": "012-345-6789",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "11",
+            "name": "Katherine Harris",
+            "email": "katherine.harris@example.com",
+            "phone": "123-456-0987",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "12",
+            "name": "Liam Thompson",
+            "email": "liam.thompson@example.com",
+            "phone": "234-567-1098",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "13",
+            "name": "Mia Martinez",
+            "email": "mia.martinez@example.com",
+            "phone": "345-678-2109",
+            "password": "password123",
+            "role": "admin"
+        },
+        {
+            "id": "14",
+            "name": "Noah Garcia",
+            "email": "noah.garcia@example.com",
+            "phone": "456-789-3210",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "15",
+            "name": "Olivia Robinson",
+            "email": "olivia.robinson@example.com",
+            "phone": "567-890-4321",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "16",
+            "name": "Paul Walker",
+            "email": "paul.walker@example.com",
+            "phone": "678-901-5432",
+            "password": "password123",
+            "role": "admin"
+        },
+        {
+            "id": "17",
+            "name": "Quinn Hall",
+            "email": "quinn.hall@example.com",
+            "phone": "789-012-6543",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "18",
+            "name": "Rachel Young",
+            "email": "rachel.young@example.com",
+            "phone": "890-123-7654",
+            "password": "password123",
+            "role": "user"
+        },
+        {
+            "id": "19",
+            "name": "Samuel King",
+            "email": "samuel.king@example.com",
+            "phone": "901-234-8765",
+            "password": "password123",
+            "role": "admin"
+        },
+        {
+            "id": "20",
+            "name": "Tina Scott",
+            "email": "tina.scott@example.com",
+            "phone": "012-345-9876",
+            "password": "password123",
+            "role": "user"
+        }
+    ]
+}
