@@ -18,7 +18,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { visuallyHidden } from '@mui/utils';
 import { orders } from "./../data/orders.json";
 import { CSVLink } from "react-csv";
-import { Button, FormControl, Menu, MenuItem, Stack, TableFooter, TextField } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Menu, MenuItem, Stack, TableFooter, TextField } from '@mui/material';
 import { BiImport } from 'react-icons/bi';
 import { FaArchive, FaEdit, FaRegEdit, FaTrash } from "react-icons/fa";
 import { blue, green, red } from '@mui/material/colors';
@@ -28,9 +28,10 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import { useTheme } from '@mui/material/styles';
 import { Link, useNavigate } from 'react-router-dom';
+import { MdDelete, MdEdit } from 'react-icons/md';
 
 interface Sale {
-    id: string;
+    id: number;
     customer_id: string;
     order_date: string;
     total_amount: number;
@@ -42,7 +43,7 @@ interface Sale {
 }
 
 interface Product {
-    product_id: string;
+    product_id: number;
     product_name: string;
     quantity: number;
     price_per_unit: number;
@@ -156,6 +157,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                         </TableSortLabel>
                     </TableCell>
                 ))}
+                <TableCell>
+                    Actions
+                </TableCell>
             </TableRow>
         </TableHead>
     );
@@ -359,14 +363,30 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
 const Sales = () => {
     const [order, setOrder] = React.useState<Order>('asc');
     const [orderBy, setOrderBy] = React.useState<keyof Sale>('id');
-    const [selected, setSelected] = React.useState<readonly string[]>([]);
+    const [selected, setSelected] = React.useState<readonly number[]>([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const navigate = useNavigate();
+    const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
+    const [rowToDelete, setRowToDelete] = React.useState<number | null>(null);
 
-    const handleRowClick = (event: React.MouseEvent<unknown>, id: string) => {
-        handleClick(event, id);
-        navigate(`/orders/id`);
+    const handleDeleteClick = (rowId: number) => {
+        setRowToDelete(rowId);
+        setOpenDeleteModal(true);
+    };
+
+    const handleClose = () => {
+        setOpenDeleteModal(false);
+        setRowToDelete(null);
+    };
+
+    const handleConfirmDelete = () => {
+        console.log("Deleted row with ID:", rowToDelete);
+        handleClose();
+    };
+
+    const handleRowClick = (id: number) => {
+        navigate(`/orders/${id}`);
     };
     const handleRequestSort = (
         _event: React.MouseEvent<unknown>,
@@ -386,9 +406,9 @@ const Sales = () => {
         setSelected([]);
     };
 
-    const handleClick = (_event: React.MouseEvent<unknown>, id: string) => {
+    const handleClick = (_event: React.MouseEvent<unknown>, id: number) => {
         const selectedIndex = selected.indexOf(id);
-        let newSelected: readonly string[] = [];
+        let newSelected: readonly number[] = [];
 
         if (selectedIndex === -1) {
             newSelected = newSelected.concat(selected, id);
@@ -449,7 +469,7 @@ const Sales = () => {
                             return (
                                 <TableRow
                                     hover
-                                    onClick={(event) => handleRowClick(event, row.id)}
+                                    onClick={() => handleRowClick(row.id)}
                                     role="checkbox"
                                     aria-checked={isItemSelected}
                                     tabIndex={-1}
@@ -459,9 +479,10 @@ const Sales = () => {
                                         cursor: "pointer"
                                     }}
                                 >
-                                    <TableCell padding="checkbox">
+                                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
                                         <Checkbox
                                             color="primary"
+                                            onClick={(event) => handleClick(event, row.id)}
                                             checked={isItemSelected}
                                             inputProps={{ 'aria-labelledby': labelId }}
                                         />
@@ -476,6 +497,29 @@ const Sales = () => {
                                     <TableCell>{row.outstanding_balance}</TableCell>
                                     <TableCell>{row.order_date}</TableCell>
                                     <TableCell>{row.notes}</TableCell>
+                                    <TableCell onClick={(e) => e.stopPropagation()}>
+                                        <Stack direction="row" spacing={1}>
+                                            <IconButton
+                                                component={Link}
+                                                to={`/orders/${row.id}/update`}
+                                                color="primary"
+                                                sx={{
+                                                    border: "1px solid"
+                                                }}
+                                            >
+                                                <MdEdit />
+                                            </IconButton>
+                                            <IconButton
+                                                color="error"
+                                                sx={{
+                                                    border: "1px solid"
+                                                }}
+                                                onClick={() => handleDeleteClick(row.id)}
+                                            >
+                                                <MdDelete />
+                                            </IconButton>
+                                        </Stack>
+                                    </TableCell>
                                 </TableRow>
                             );
                         })}
@@ -508,6 +552,33 @@ const Sales = () => {
                     </TableFooter>
                 </Table>
             </TableContainer>
+            {/* Confirmation Dialog */}
+            <Dialog open={openDeleteModal} onClose={handleClose}>
+                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to delete this item? This action cannot be undone.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary" variant='contained' sx={{
+                        boxShadow: "none",
+                        ":hover": {
+                            boxShadow: "none"
+                        }
+                    }}>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleConfirmDelete} color="error" variant='contained' sx={{
+                        boxShadow: "none",
+                        ":hover": {
+                            boxShadow: "none"
+                        }
+                    }}>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Paper>)
 }
 

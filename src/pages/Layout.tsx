@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router-dom"
+import { Link, Outlet, useLocation } from "react-router-dom"
 import * as React from 'react';
 import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -20,7 +20,7 @@ import ListItemText from '@mui/material/ListItemText';
 
 import { MdCategory, MdDashboard } from "react-icons/md";
 // import { RiShoppingCartFill, RiBarChart2Fill } from "react-icons/ri";
-import { RiShoppingCartFill } from "react-icons/ri";
+import { RiBankFill, RiShoppingCartFill } from "react-icons/ri";
 import { FaCog, FaShoppingBag, FaSignOutAlt, FaUsers } from "react-icons/fa";
 import { HiOfficeBuilding } from "react-icons/hi";
 import { FaUser } from "react-icons/fa6";
@@ -30,7 +30,6 @@ import ScrollToTopButton from "../components/ScrollToTopButton";
 // assets--------------------------------------
 import logo from "./../assets/mainlogo.png"
 import { Avatar, Menu, MenuItem, Stack } from "@mui/material";
-import { FiMoon, FiSun } from "react-icons/fi";
 import { AiFillProduct } from "react-icons/ai";
 const drawerWidth = 240;
 
@@ -133,6 +132,11 @@ const routes = [
         icon: <FaUsers size={22} />,
     },
     {
+        link: '/payments',
+        title: 'Payments',
+        icon: <RiBankFill size={22} />,
+    },
+    {
         link: '/orders',
         title: 'Orders',
         icon: <RiShoppingCartFill size={22} />,
@@ -165,9 +169,9 @@ const routes = [
 ];
 const Layout = () => {
     const theme = useTheme();
+    const location = useLocation();
     const [open, setOpen] = React.useState(false);
     const [profileAnchorEl, setProfileAnchorEl] = React.useState<HTMLElement | null>(null);
-    const [isDarkMode, setIsDarkMode] = React.useState(false);
 
 
     const handleProfileMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -178,10 +182,6 @@ const Layout = () => {
         setProfileAnchorEl(null);
     };
 
-    const handleToggleMode = () => {
-        setIsDarkMode(!isDarkMode);
-        // Add dark mode functionality here
-    };
     const handleDrawerOpen = () => {
         setOpen(true);
     };
@@ -223,11 +223,6 @@ const Layout = () => {
                         sx={{ ml: "auto" }}
                     >
 
-                        {/* Mode Toggle Button */}
-                        <IconButton color="inherit" onClick={handleToggleMode}>
-                            {isDarkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
-                        </IconButton>
-
                         {/* Profile Button */}
                         <Box>
                             <IconButton onClick={handleProfileMenuOpen} color="inherit">
@@ -268,6 +263,12 @@ const Layout = () => {
                                         {
                                             minHeight: 48,
                                             px: 2.5,
+                                            backgroundColor: location.pathname === route.link ? "#1976d250" : 'transparent',
+                                            borderLeft: location.pathname === route.link ? "4px solid #1976d2" : '4px solid transparent',
+                                            ":hover": {
+                                                backgroundColor: location.pathname === route.link ? "#1976d280" : '#cccccc50',
+                                                borderLeft: location.pathname === route.link ? "4px solid #1976d2" : '4px solid #cccccc',
+                                            },
                                         },
                                         open
                                             ? {
@@ -283,6 +284,7 @@ const Layout = () => {
                                             {
                                                 minWidth: 0,
                                                 justifyContent: 'center',
+                                                color: location.pathname === route.link ? "#1976d2" : 'd',
                                             },
                                             open
                                                 ? {
@@ -317,7 +319,7 @@ const Layout = () => {
                 <DrawerHeader />
                 <Outlet />
             </Box>
-        </Box>
+        </Box >
     )
 }
 

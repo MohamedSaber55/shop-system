@@ -1,7 +1,7 @@
 {
     "products": [
         {
-            "id": "product_001",
+            "id": 1,
             "name": "Product One",
             "quantity": 50,
             "isStock": true,
@@ -9,7 +9,7 @@
             "category_id": "category_id_001"
         },
         {
-            "id": "product_002",
+            "id": 2,
             "name": "Product Two",
             "quantity": 20,
             "isStock": true,
@@ -17,7 +17,7 @@
             "category_id": "category_id_002"
         },
         {
-            "id": "product_003",
+            "id": 3,
             "name": "Product Three",
             "quantity": 0,
             "isStock": false,
@@ -25,7 +25,7 @@
             "category_id": "category_id_003"
         },
         {
-            "id": "product_004",
+            "id": 4,
             "name": "Product Four",
             "quantity": 100,
             "isStock": true,
@@ -33,7 +33,7 @@
             "category_id": "category_id_004"
         },
         {
-            "id": "product_005",
+            "id": 5,
             "name": "Product Five",
             "quantity": 75,
             "isStock": true,
@@ -41,7 +41,7 @@
             "category_id": "category_id_005"
         },
         {
-            "id": "product_006",
+            "id": 6,
             "name": "Product Six",
             "quantity": 10,
             "isStock": true,
@@ -49,7 +49,7 @@
             "category_id": "category_id_006"
         },
         {
-            "id": "product_007",
+            "id": 7,
             "name": "Product Seven",
             "quantity": 5,
             "isStock": false,
@@ -57,7 +57,7 @@
             "category_id": "category_id_007"
         },
         {
-            "id": "product_008",
+            "id": 8,
             "name": "Product Eight",
             "quantity": 30,
             "isStock": true,
@@ -65,7 +65,7 @@
             "category_id": "category_id_008"
         },
         {
-            "id": "product_009",
+            "id": 9,
             "name": "Product Nine",
             "quantity": 12,
             "isStock": true,
@@ -73,7 +73,7 @@
             "category_id": "category_id_009"
         },
         {
-            "id": "product_010",
+            "id": 10,
             "name": "Product Ten",
             "quantity": 0,
             "isStock": false,
@@ -81,7 +81,7 @@
             "category_id": "category_id_010"
         },
         {
-            "id": "product_011",
+            "id": 11,
             "name": "Product Eleven",
             "quantity": 45,
             "isStock": true,
@@ -89,7 +89,7 @@
             "category_id": "category_id_011"
         },
         {
-            "id": "product_012",
+            "id": 12,
             "name": "Product Twelve",
             "quantity": 25,
             "isStock": true,
@@ -97,7 +97,7 @@
             "category_id": "category_id_012"
         },
         {
-            "id": "product_013",
+            "id": 13,
             "name": "Product Thirteen",
             "quantity": 60,
             "isStock": true,
@@ -105,7 +105,7 @@
             "category_id": "category_id_013"
         },
         {
-            "id": "product_014",
+            "id": 14,
             "name": "Product Fourteen",
             "quantity": 8,
             "isStock": false,
@@ -113,7 +113,7 @@
             "category_id": "category_id_014"
         },
         {
-            "id": "product_015",
+            "id": 15,
             "name": "Product Fifteen",
             "quantity": 90,
             "isStock": true,
@@ -121,7 +121,7 @@
             "category_id": "category_id_015"
         },
         {
-            "id": "product_016",
+            "id": 16,
             "name": "Product Sixteen",
             "quantity": 35,
             "isStock": true,
@@ -129,7 +129,7 @@
             "category_id": "category_id_016"
         },
         {
-            "id": "product_017",
+            "id": 17,
             "name": "Product Seventeen",
             "quantity": 0,
             "isStock": false,
@@ -137,7 +137,7 @@
             "category_id": "category_id_017"
         },
         {
-            "id": "product_018",
+            "id": 18,
             "name": "Product Eighteen",
             "quantity": 15,
             "isStock": true,
@@ -145,7 +145,7 @@
             "category_id": "category_id_018"
         },
         {
-            "id": "product_019",
+            "id": 19,
             "name": "Product Nineteen",
             "quantity": 100,
             "isStock": true,
@@ -153,7 +153,7 @@
             "category_id": "category_id_019"
         },
         {
-            "id": "product_020",
+            "id": 20,
             "name": "Product Twenty",
             "quantity": 50,
             "isStock": true,

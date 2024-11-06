@@ -18,7 +18,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { visuallyHidden } from '@mui/utils';
 import { purchases } from "./../data/purchases.json";
 import { CSVLink } from "react-csv";
-import { Button, FormControl, Menu, MenuItem, Stack, TableFooter, TextField } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Menu, MenuItem, Stack, TableFooter, TextField } from '@mui/material';
 import { BiImport } from 'react-icons/bi';
 import { FaArchive, FaEdit, FaRegEdit, FaTrash } from "react-icons/fa";
 import { blue, green, red } from '@mui/material/colors';
@@ -28,9 +28,10 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import { useTheme } from '@mui/material/styles';
 import { Link, useNavigate } from 'react-router-dom';
+import { MdDelete, MdEdit } from 'react-icons/md';
 
 interface Purchase {
-    id: string;
+    id: number;
     merchant_id: string;
     order_date: string;
     total_amount: number;
@@ -47,16 +48,6 @@ interface Product {
 }
 
 const data: Purchase[] = purchases;
-
-// function descendingComparator(a: Purchase, b: Purchase, orderBy: keyof Purchase) {
-//     if (b[orderBy] < a[orderBy]) {
-//         return -1;
-//     }
-//     if (b[orderBy] > a[orderBy]) {
-//         return 1;
-//     }
-//     return 0;
-// }
 
 function descendingComparator(a: Purchase, b: Purchase, orderBy: keyof Purchase) {
     const valueA = a[orderBy];
@@ -151,6 +142,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                         </TableSortLabel>
                     </TableCell>
                 ))}
+                <TableCell>
+                    Actions
+                </TableCell>
             </TableRow>
         </TableHead>
     );
@@ -265,7 +259,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                             },
                         }}
                     >
-                        <Link to={"/purchase/add"} style={{ color: "inherit", textDecoration: 'none', whiteSpace: "nowrap" }}>Add Purchase</Link>
+                        <Link to={"/purchases/add"} style={{ color: "inherit", textDecoration: 'none', whiteSpace: "nowrap" }}>Add Purchase</Link>
                     </Button>
 
                     <FormControl variant="outlined" size="small" sx={{ minWidth: 200 }}>
@@ -354,14 +348,29 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
 const Purchases = () => {
     const [order, setOrder] = React.useState<Order>('asc');
     const [orderBy, setOrderBy] = React.useState<keyof Purchase>('id');
-    const [selected, setSelected] = React.useState<readonly string[]>([]);
+    const [selected, setSelected] = React.useState<readonly number[]>([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
-    const navigate = useNavigate();
+    const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
+    const [rowToDelete, setRowToDelete] = React.useState<number | null>(null);
+    const navigate = useNavigate()
 
-    const handleRowClick = (event: React.MouseEvent<unknown>, id: string) => {
-        handleClick(event, id);
-        navigate(`/purchases/id`);
+    const handleDeleteClick = (rowId: number) => {
+        setRowToDelete(rowId);
+        setOpenDeleteModal(true);
+    };
+
+    const handleClose = () => {
+        setOpenDeleteModal(false);
+        setRowToDelete(null);
+    };
+
+    const handleConfirmDelete = () => {
+        console.log("Deleted row with ID:", rowToDelete);
+        handleClose();
+    };
+    const handleRowClick = (id: number) => {
+        navigate(`/purchases/${id}`);
     };
     const handleRequestSort = (
         _event: React.MouseEvent<unknown>,
@@ -381,9 +390,9 @@ const Purchases = () => {
         setSelected([]);
     };
 
-    const handleClick = (_event: React.MouseEvent<unknown>, id: string) => {
+    const handleClick = (_event: React.MouseEvent<unknown>, id: number) => {
         const selectedIndex = selected.indexOf(id);
-        let newSelected: readonly string[] = [];
+        let newSelected: readonly number[] = [];
 
         if (selectedIndex === -1) {
             newSelected = newSelected.concat(selected, id);
@@ -444,7 +453,7 @@ const Purchases = () => {
                             return (
                                 <TableRow
                                     hover
-                                    onClick={(event) => handleRowClick(event, row.id)}
+                                    onClick={() => handleRowClick(row.id)}
                                     role="checkbox"
                                     aria-checked={isItemSelected}
                                     tabIndex={-1}
@@ -454,9 +463,10 @@ const Purchases = () => {
                                         cursor: "pointer"
                                     }}
                                 >
-                                    <TableCell padding="checkbox">
+                                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
                                         <Checkbox
                                             color="primary"
+                                            onClick={(event) => handleClick(event, row.id)}
                                             checked={isItemSelected}
                                             inputProps={{ 'aria-labelledby': labelId }}
                                         />
@@ -469,6 +479,33 @@ const Purchases = () => {
                                     <TableCell>{row.outstanding_balance}</TableCell>
                                     <TableCell>{row.order_date}</TableCell>
                                     <TableCell>{row.notes}</TableCell>
+                                    <TableCell onClick={(e) => e.stopPropagation()}>
+                                        <Stack direction="row" spacing={1}>
+                                            <IconButton
+                                                component={Link}
+                                                to={`/purchases/${row.id}/update`}
+                                                color="primary"
+                                                sx={{
+                                                    border: "1px solid"
+                                                }}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <MdEdit />
+                                            </IconButton>
+                                            <IconButton
+                                                color="error"
+                                                sx={{
+                                                    border: "1px solid"
+                                                }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteClick(row.id);
+                                                }}
+                                            >
+                                                <MdDelete />
+                                            </IconButton>
+                                        </Stack>
+                                    </TableCell>
                                 </TableRow>
                             );
                         })}
@@ -501,6 +538,33 @@ const Purchases = () => {
                     </TableFooter>
                 </Table>
             </TableContainer>
+            {/* Confirmation Dialog */}
+            <Dialog open={openDeleteModal} onClose={handleClose}>
+                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to delete this item? This action cannot be undone.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary" variant='contained' sx={{
+                        boxShadow: "none",
+                        ":hover": {
+                            boxShadow: "none"
+                        }
+                    }}>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleConfirmDelete} color="error" variant='contained' sx={{
+                        boxShadow: "none",
+                        ":hover": {
+                            boxShadow: "none"
+                        }
+                    }}>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Paper>)
 }
 

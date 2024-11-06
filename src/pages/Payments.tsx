@@ -17,7 +17,7 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { visuallyHidden } from '@mui/utils';
-import { customers } from "./../data/customers.json";
+import { payments } from "./../data/payments.json";
 import { CSVLink } from "react-csv";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Stack, TableFooter, TextField } from '@mui/material';
 import { BiImport } from 'react-icons/bi';
@@ -26,21 +26,20 @@ import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import { useTheme } from '@mui/material/styles';
-import { useNavigate } from "react-router-dom"
-import AddCustomer from './AddCustomer';
+import { Link } from "react-router-dom"
 import { MdDelete, MdEdit } from 'react-icons/md';
-import UpdateCustomer from '../components/UpdateCutomer';
-interface Customer {
+
+interface Payment {
     id: number;
-    name: string;
-    phone: string;
-    orders: number[];
-    money_owed: number;
+    customer_id: string;
+    amount: number;
+    date: string;
+    info: string;
 }
 
-const data: Customer[] = customers;
+const data: Payment[] = payments;
 
-function descendingComparator(a: Customer, b: Customer, orderBy: keyof Customer) {
+function descendingComparator(a: Payment, b: Payment, orderBy: keyof Payment) {
     if (b[orderBy] < a[orderBy]) {
         return -1;
     }
@@ -52,10 +51,10 @@ function descendingComparator(a: Customer, b: Customer, orderBy: keyof Customer)
 
 type Order = 'asc' | 'desc';
 
-function getComparator<Key extends keyof Customer>(
+function getComparator<Key extends keyof Payment>(
     order: Order,
     orderBy: Key
-): (a: Customer, b: Customer) => number {
+): (a: Payment, b: Payment) => number {
     return order === 'desc'
         ? (a, b) => descendingComparator(a, b, orderBy)
         : (a, b) => -descendingComparator(a, b, orderBy);
@@ -63,22 +62,22 @@ function getComparator<Key extends keyof Customer>(
 
 interface HeadCell {
     disablePadding: boolean;
-    id: keyof Customer;
+    id: keyof Payment;
     label: string;
     numeric: boolean;
 }
 
 const headCells: readonly HeadCell[] = [
     { id: 'id', numeric: false, disablePadding: false, label: 'ID' },
-    { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
-    { id: 'phone', numeric: true, disablePadding: false, label: 'Phone' },
-    { id: 'money_owed', numeric: true, disablePadding: false, label: 'Money Owed (EGP)' },
-    { id: 'orders', numeric: true, disablePadding: false, label: 'Orders' },
+    { id: 'amount', numeric: false, disablePadding: false, label: 'Amount (EGP)' },
+    { id: 'customer_id', numeric: true, disablePadding: false, label: 'Customer' },
+    { id: 'date', numeric: true, disablePadding: false, label: 'Date' },
+    { id: 'info', numeric: true, disablePadding: false, label: 'Info' },
 ];
 
 interface EnhancedTableProps {
     numSelected: number;
-    onRequestSort: (event: React.MouseEvent<unknown>, property: keyof Customer) => void;
+    onRequestSort: (event: React.MouseEvent<unknown>, property: keyof Payment) => void;
     onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
     order: Order;
     orderBy: string;
@@ -87,7 +86,7 @@ interface EnhancedTableProps {
 
 function EnhancedTableHead(props: EnhancedTableProps) {
     const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-    const createSortHandler = (property: keyof Customer) => (event: React.MouseEvent<unknown>) => {
+    const createSortHandler = (property: keyof Payment) => (event: React.MouseEvent<unknown>) => {
         onRequestSort(event, property);
     };
 
@@ -100,10 +99,10 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                         indeterminate={numSelected > 0 && numSelected < rowCount}
                         checked={rowCount > 0 && numSelected === rowCount}
                         onChange={onSelectAllClick}
-                        inputProps={{ 'aria-label': 'select all customers' }}
+                        inputProps={{ 'aria-label': 'select all payments' }}
                     />
                 </TableCell>
-                {headCells.filter((headCell) => headCell.id !== "orders").map((headCell) => (
+                {headCells.map((headCell) => (
                     <TableCell
                         key={headCell.id}
                         align={'left'}
@@ -136,17 +135,13 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 interface EnhancedTableToolbarProps {
     numSelected: number;
-    customersData: Customer[];
+    paymentsData: Payment[];
     onSearch: (query: string) => void;
 }
 
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-    const { numSelected, customersData, onSearch } = props;
+    const { numSelected, paymentsData, onSearch } = props;
     const [searchQuery, setSearchQuery] = React.useState('');
-    const [open, setOpen] = React.useState(false);
-
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
 
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
@@ -156,9 +151,10 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
 
     const csvHeaders = [
         { label: 'ID', key: 'id' },
-        { label: 'Name', key: 'name' },
-        { label: 'Phone', key: 'phone' },
-        { label: 'Money Owed', key: 'money_owed' },
+        { label: 'Amount', key: 'name' },
+        { label: 'Customer', key: 'customer_id' },
+        { label: 'Date', key: 'date' },
+        { label: 'Info', key: 'info' },
     ];
 
     return (
@@ -176,7 +172,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 </Typography>
             ) : (
                 <Typography sx={{ flex: '1 1 100%' }} variant="h5" id="tableTitle" component="div">
-                    Customers
+                    Payments
                 </Typography>
             )}
             {numSelected > 0 ? (
@@ -191,9 +187,9 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                     <Tooltip title="Export CSV" arrow>
                         <IconButton sx={{ color: 'primary.main' }}>
                             <CSVLink
-                                data={customersData}
+                                data={paymentsData}
                                 headers={csvHeaders}
-                                filename="customers_data.csv"
+                                filename="payments_data.csv"
                                 style={{ color: 'inherit', padding: 0, display: 'flex', alignItems: 'center' }}
                             >
                                 <BiImport size={24} />
@@ -203,7 +199,8 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
 
                     <Button
                         variant="outlined"
-                        onClick={handleOpen}
+                        component={Link}
+                        to={`/payments/add`}
                         sx={{
                             textTransform: 'none',
                             fontSize: "16px",
@@ -217,13 +214,12 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                             textWrap: "nowrap"
                         }}
                     >
-                        Add Customer
+                        Add Payment
                     </Button>
-                    <AddCustomer open={open} onClose={handleClose} />
 
                     <FormControl variant="outlined" size="small" sx={{ minWidth: 250 }}>
                         <TextField
-                            id="search-customers"
+                            id="search-payments"
                             size="small"
                             value={searchQuery}
                             onChange={handleSearch}
@@ -309,29 +305,14 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
     );
 }
 
-const Customers = () => {
+const Payments = () => {
     const [order, setOrder] = React.useState<Order>('asc');
-    const [orderBy, setOrderBy] = React.useState<keyof Customer>('id');
+    const [orderBy, setOrderBy] = React.useState<keyof Payment>('id');
     const [selected, setSelected] = React.useState<readonly number[]>([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
     const [rowToDelete, setRowToDelete] = React.useState<number | null>(null);
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = React.useState<boolean>(false);
-    const [selectedCustomer, setSelectedCustomer] = React.useState<Customer | null>(null);
-    const navigate = useNavigate()
-
-    // Function to handle opening the modal in edit mode
-    const handleEditClick = (customer: Customer) => {
-        setSelectedCustomer(customer);
-        setIsUpdateModalOpen(true);
-    };
-
-    // Function to handle closing the modal
-    const handleCloseUpdateModal = () => {
-        setIsUpdateModalOpen(false);
-        setSelectedCustomer(null);
-    };
 
     const handleDeleteClick = (rowId: number) => {
         setRowToDelete(rowId);
@@ -350,7 +331,7 @@ const Customers = () => {
 
     const handleRequestSort = (
         _event: React.MouseEvent<unknown>,
-        property: keyof Customer,
+        property: keyof Payment,
     ) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -408,13 +389,10 @@ const Customers = () => {
     const handleSearch = (searchTerm: string) => {
         console.log(searchTerm);
     }
-    const handleRowClick = (id: number) => {
-        navigate(`/customers/${id}`);
-    };
 
     return (
         <Paper elevation={0} sx={{ width: '100%', overflow: 'hidden' }}>
-            <EnhancedTableToolbar numSelected={selected.length} customersData={data} onSearch={handleSearch} />
+            <EnhancedTableToolbar numSelected={selected.length} paymentsData={data} onSearch={handleSearch} />
             <TableContainer sx={{ border: "1px solid #eee" }}>
                 <Table stickyHeader aria-label="sticky table">
                     <EnhancedTableHead
@@ -438,8 +416,6 @@ const Customers = () => {
                                     tabIndex={-1}
                                     key={row.id}
                                     selected={isItemSelected}
-                                    onClick={() => handleRowClick(row.id)}
-                                    sx={{ cursor: 'pointer' }}
                                 >
                                     <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
                                         <Checkbox
@@ -450,19 +426,21 @@ const Customers = () => {
                                         />
                                     </TableCell>
                                     <TableCell>{row.id}</TableCell>
-                                    <TableCell>{row.name}</TableCell>
-                                    <TableCell>{row.phone}</TableCell>
-                                    <TableCell>{row.money_owed}</TableCell>
+                                    <TableCell>{row.amount}</TableCell>
+                                    <TableCell>{row.customer_id}</TableCell>
+                                    <TableCell>{row.date}</TableCell>
+                                    <TableCell>{row.info}</TableCell>
                                     <TableCell onClick={(e) => e.stopPropagation()}>
                                         <Stack direction="row" spacing={1}>
                                             <IconButton
+                                                component={Link}
+                                                to={`/payments/${row.id}/update`}
                                                 color="primary"
                                                 sx={{
                                                     border: "1px solid"
                                                 }}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleEditClick(row);
                                                 }}                                            >
                                                 <MdEdit />
                                             </IconButton>
@@ -488,11 +466,6 @@ const Customers = () => {
                                 <TableCell colSpan={6} />
                             </TableRow>
                         )}
-                        <UpdateCustomer
-                            open={isUpdateModalOpen}
-                            onClose={handleCloseUpdateModal}
-                            customerData={selectedCustomer || undefined} // Pass selected customer data if editing, else undefined
-                        />
                     </TableBody>
                     <TableFooter>
                         <TableRow>
@@ -548,4 +521,4 @@ const Customers = () => {
     );
 };
 
-export default Customers;
+export default Payments;

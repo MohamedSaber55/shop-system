@@ -15,30 +15,46 @@ import {
     Box,
 } from '@mui/material';
 
+interface Merchant {
+    id?: number;
+    name: string;
+    phone: string;
+    address: string;
+}
+
 interface Props {
     open: boolean;
     onClose: () => void;
+    merchantData?: Merchant;
 }
 
-const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
+const UpdateMerchant: React.FC<Props> = ({ open, onClose, merchantData }) => {
     const [snackbarOpen, setSnackbarOpen] = React.useState(false);
     const [successMessage, setSuccessMessage] = React.useState('');
 
     const formik = useFormik({
         initialValues: {
-            name: '',
-            phone: '',
+            name: merchantData?.name || '',
+            phone: merchantData?.phone || '',
+            address: merchantData?.address || '',
         },
+        enableReinitialize: true, // Reinitialize form values when merchantData changes
         validationSchema: Yup.object({
             name: Yup.string().required('Name is required'),
             phone: Yup.string().required('Phone number is required'),
+            address: Yup.string().required('Address is required'),
         }),
         onSubmit: (values) => {
-            console.log(values);
-            setSuccessMessage('Customer added successfully!');
+            if (merchantData) {
+                console.log('Updating merchant:', values);
+                setSuccessMessage('Merchant updated successfully!');
+            } else {
+                console.log('Adding new merchant:', values);
+                setSuccessMessage('Merchant added successfully!');
+            }
             setSnackbarOpen(true);
             formik.resetForm();
-            onClose();
+            onClose(); // Close modal after successful submission
         },
     });
 
@@ -48,10 +64,10 @@ const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-            <DialogTitle>Add New Customer</DialogTitle>
+            <DialogTitle>{merchantData ? 'Update Merchant' : 'Add New Merchant'}</DialogTitle>
             <DialogContent>
                 <DialogContentText>
-                    Please enter the customer’s name and phone number.
+                    Please enter the merchant’s name, phone number, and address.
                 </DialogContentText>
                 <Box component="form" onSubmit={formik.handleSubmit} noValidate sx={{ mt: 2 }}>
                     <Grid container spacing={2}>
@@ -79,11 +95,23 @@ const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
                                 helperText={formik.touched.phone && formik.errors.phone}
                             />
                         </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Address"
+                                name="address"
+                                variant="outlined"
+                                value={formik.values.address}
+                                onChange={formik.handleChange}
+                                error={formik.touched.address && Boolean(formik.errors.address)}
+                                helperText={formik.touched.address && formik.errors.address}
+                            />
+                        </Grid>
                     </Grid>
                 </Box>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="error" variant='outlined'>
+                <Button onClick={onClose} color="error" variant="outlined">
                     Cancel
                 </Button>
                 <Button
@@ -95,8 +123,9 @@ const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
                         ":hover": {
                             boxShadow: "none"
                         }
-                    }}>
-                    Add Customer
+                    }}
+                >
+                    {merchantData ? 'Update Merchant' : 'Add Merchant'}
                 </Button>
             </DialogActions>
             <Snackbar
@@ -112,4 +141,4 @@ const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
     );
 };
 
-export default AddCustomer;
+export default UpdateMerchant;

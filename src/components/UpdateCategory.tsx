@@ -2,42 +2,56 @@ import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import {
-    TextField,
-    Button,
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogTitle,
-    Grid,
+    TextField,
+    Button,
+    Box,
     Snackbar,
     Alert,
-    Box,
+    Grid,
 } from '@mui/material';
+// import { MdEdit } from 'react-icons/md';
+// import { IoClose } from 'react-icons/io5';
 
-interface Props {
-    open: boolean;
-    onClose: () => void;
+// Define the type for the form values
+interface Category {
+    id?: number;
+    name: string;
 }
 
-const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
+
+// Define the types for the component props
+interface UpdateCategoryProps {
+    open: boolean;
+    onClose: () => void;
+    categoryData?: Category | undefined;
+}
+
+// Validation schema using Yup
+const validationSchema = Yup.object({
+    name: Yup.string()
+        .required('Category name is required')
+        .min(3, 'Must be at least 3 characters'),
+});
+
+const UpdateCategory: React.FC<UpdateCategoryProps> = ({ open, onClose, categoryData }) => {
     const [snackbarOpen, setSnackbarOpen] = React.useState(false);
     const [successMessage, setSuccessMessage] = React.useState('');
 
     const formik = useFormik({
         initialValues: {
-            name: '',
-            phone: '',
+            name: categoryData?.name || "",
         },
-        validationSchema: Yup.object({
-            name: Yup.string().required('Name is required'),
-            phone: Yup.string().required('Phone number is required'),
-        }),
-        onSubmit: (values) => {
+        enableReinitialize: true,
+        validationSchema,
+        onSubmit: (values, { resetForm }) => {
+            setSuccessMessage('Category updated successfully!');
             console.log(values);
-            setSuccessMessage('Customer added successfully!');
             setSnackbarOpen(true);
-            formik.resetForm();
+            resetForm();
             onClose();
         },
     });
@@ -48,55 +62,52 @@ const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-            <DialogTitle>Add New Customer</DialogTitle>
+            <DialogTitle>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                    Update Category
+                    {/* <IconButton onClick={onClose}>
+                        <IoClose />
+                    </IconButton> */}
+                </Box>
+            </DialogTitle>
             <DialogContent>
-                <DialogContentText>
-                    Please enter the customer’s name and phone number.
-                </DialogContentText>
                 <Box component="form" onSubmit={formik.handleSubmit} noValidate sx={{ mt: 2 }}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <TextField
                                 fullWidth
-                                label="Name"
+                                id="name"
                                 name="name"
+                                label="Category Name"
                                 variant="outlined"
                                 value={formik.values.name}
                                 onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
                                 error={formik.touched.name && Boolean(formik.errors.name)}
                                 helperText={formik.touched.name && formik.errors.name}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                label="Phone Number"
-                                name="phone"
-                                variant="outlined"
-                                value={formik.values.phone}
-                                onChange={formik.handleChange}
-                                error={formik.touched.phone && Boolean(formik.errors.phone)}
-                                helperText={formik.touched.phone && formik.errors.phone}
                             />
                         </Grid>
                     </Grid>
                 </Box>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="error" variant='outlined'>
+                <Button onClick={onClose} color="error" variant="outlined">
                     Cancel
                 </Button>
                 <Button
                     type="submit"
                     variant="contained"
                     color="primary"
+                    onClick={formik.handleSubmit as never} // Type override for submit
+                    // startIcon={<MdEdit />}
                     sx={{
                         boxShadow: "none",
                         ":hover": {
-                            boxShadow: "none"
-                        }
-                    }}>
-                    Add Customer
+                            boxShadow: "none",
+                        },
+                    }}
+                >
+                    Update Category
                 </Button>
             </DialogActions>
             <Snackbar
@@ -112,4 +123,4 @@ const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
     );
 };
 
-export default AddCustomer;
+export default UpdateCategory;

@@ -15,27 +15,40 @@ import {
     Box,
 } from '@mui/material';
 
+interface Customer {
+    id?: number;
+    name: string;
+    phone: string;
+}
+
 interface Props {
     open: boolean;
     onClose: () => void;
+    customerData?: Customer;
 }
 
-const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
+const UpdateCustomer: React.FC<Props> = ({ open, onClose, customerData }) => {
     const [snackbarOpen, setSnackbarOpen] = React.useState(false);
     const [successMessage, setSuccessMessage] = React.useState('');
 
     const formik = useFormik({
         initialValues: {
-            name: '',
-            phone: '',
+            name: customerData?.name || '',
+            phone: customerData?.phone || '',
         },
+        enableReinitialize: true,
         validationSchema: Yup.object({
             name: Yup.string().required('Name is required'),
             phone: Yup.string().required('Phone number is required'),
         }),
         onSubmit: (values) => {
-            console.log(values);
-            setSuccessMessage('Customer added successfully!');
+            if (customerData) {
+                console.log('Updating customer:', values);
+                setSuccessMessage('Customer updated successfully!');
+            } else {
+                console.log('Adding new customer:', values);
+                setSuccessMessage('Customer added successfully!');
+            }
             setSnackbarOpen(true);
             formik.resetForm();
             onClose();
@@ -48,7 +61,7 @@ const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-            <DialogTitle>Add New Customer</DialogTitle>
+            <DialogTitle>{customerData ? 'Update Customer' : 'Add New Customer'}</DialogTitle>
             <DialogContent>
                 <DialogContentText>
                     Please enter the customer’s name and phone number.
@@ -83,7 +96,7 @@ const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
                 </Box>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="error" variant='outlined'>
+                <Button onClick={onClose} color="error" variant="outlined">
                     Cancel
                 </Button>
                 <Button
@@ -93,10 +106,11 @@ const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
                     sx={{
                         boxShadow: "none",
                         ":hover": {
-                            boxShadow: "none"
-                        }
-                    }}>
-                    Add Customer
+                            boxShadow: "none",
+                        },
+                    }}
+                >
+                    {customerData ? 'Update Customer' : 'Add Customer'}
                 </Button>
             </DialogActions>
             <Snackbar
@@ -112,4 +126,4 @@ const AddCustomer: React.FC<Props> = ({ open, onClose }: Props) => {
     );
 };
 
-export default AddCustomer;
+export default UpdateCustomer;

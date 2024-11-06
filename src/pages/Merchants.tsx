@@ -18,7 +18,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { visuallyHidden } from '@mui/utils';
 import { merchants } from "./../data/merchants.json";
 import { CSVLink } from "react-csv";
-import { Button, FormControl, Menu, MenuItem, Stack, TableFooter, TextField } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Menu, MenuItem, Stack, TableFooter, TextField } from '@mui/material';
 import { BiImport } from 'react-icons/bi';
 import { FaArchive, FaEdit, FaRegEdit, FaTrash } from "react-icons/fa";
 import { blue, green, red } from '@mui/material/colors';
@@ -28,9 +28,12 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import { useTheme } from '@mui/material/styles';
 import AddMerchantModal from '../components/AddMerchantModal';
+import { MdDelete, MdEdit } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
+import UpdateMerchant from '../components/UpdateMerchant';
 
 interface Merchant {
-    id: string;
+    id: number;
     name: string;
     phone: string;
     address: string;
@@ -72,7 +75,7 @@ const headCells: readonly HeadCell[] = [
     { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
     { id: 'phone', numeric: false, disablePadding: false, label: 'Phone' },
     { id: 'address', numeric: false, disablePadding: false, label: 'Address' },
-    { id: 'outstanding_balance', numeric: false, disablePadding: false, label: 'Outstanding Balance' },
+    { id: 'outstanding_balance', numeric: false, disablePadding: false, label: 'Outstanding Balance (EGP)' },
 ];
 
 interface EnhancedTableProps {
@@ -123,6 +126,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                         </TableSortLabel>
                     </TableCell>
                 ))}
+                <TableCell>
+                    Actions
+                </TableCell>
             </TableRow>
         </TableHead>
     );
@@ -326,10 +332,43 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
 
 const Merchants = () => {
     const [order, setOrder] = React.useState<Order>('asc');
-    const [orderBy, setOrderBy] = React.useState<keyof Merchant>('outstanding_balance');
-    const [selected, setSelected] = React.useState<readonly string[]>([]);
+    const [orderBy, setOrderBy] = React.useState<keyof Merchant>('id');
+    const [selected, setSelected] = React.useState<readonly number[]>([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
+    const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
+    const [rowToDelete, setRowToDelete] = React.useState<number | null>(null);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = React.useState<boolean>(false);
+    const [selectedMerchant, setSelectedMerchant] = React.useState<Merchant | null>(null);
+
+    const navigate = useNavigate()
+
+    // Function to handle opening the modal in edit mode
+    const handleEditClick = (merchant: Merchant) => {
+        setSelectedMerchant(merchant);
+        setIsUpdateModalOpen(true);
+    };
+
+    // Function to handle closing the modal
+    const handleCloseUpdateModal = () => {
+        setIsUpdateModalOpen(false);
+        setSelectedMerchant(null);
+    };
+
+    const handleDeleteClick = (rowId: number) => {
+        setRowToDelete(rowId);
+        setOpenDeleteModal(true);
+    };
+
+    const handleClose = () => {
+        setOpenDeleteModal(false);
+        setRowToDelete(null);
+    };
+
+    const handleConfirmDelete = () => {
+        console.log("Deleted row with ID:", rowToDelete);
+        handleClose();
+    };
 
     const handleRequestSort = (
         _event: React.MouseEvent<unknown>,
@@ -349,9 +388,9 @@ const Merchants = () => {
         setSelected([]);
     };
 
-    const handleClick = (_event: React.MouseEvent<unknown>, id: string) => {
+    const handleClick = (_event: React.MouseEvent<unknown>, id: number) => {
         const selectedIndex = selected.indexOf(id);
-        let newSelected: readonly string[] = [];
+        let newSelected: readonly number[] = [];
 
         if (selectedIndex === -1) {
             newSelected = newSelected.concat(selected, id);
@@ -391,6 +430,11 @@ const Merchants = () => {
     const handleSearch = (searchTerm: string) => {
         console.log(searchTerm);
     }
+
+    const handleRowClick = (id: number) => {
+        navigate(`/merchants/${id}`);
+    };
+
     return (
         <Paper elevation={0} sx={{ width: '100%', overflow: 'hidden' }}>
             <EnhancedTableToolbar numSelected={selected.length} merchantsData={data} onSearch={handleSearch} />
@@ -412,16 +456,17 @@ const Merchants = () => {
                             return (
                                 <TableRow
                                     hover
-                                    onClick={(event) => handleClick(event, row.id)}
                                     role="checkbox"
                                     aria-checked={isItemSelected}
                                     tabIndex={-1}
                                     key={row.id}
+                                    onClick={() => handleRowClick(row.id)}
                                     selected={isItemSelected}
                                 >
-                                    <TableCell padding="checkbox">
+                                    <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
                                         <Checkbox
                                             color="primary"
+                                            onClick={(event) => handleClick(event, row.id)}
                                             checked={isItemSelected}
                                             inputProps={{ 'aria-labelledby': labelId }}
                                         />
@@ -433,6 +478,33 @@ const Merchants = () => {
                                     <TableCell>{row.phone}</TableCell>
                                     <TableCell>{row.address}</TableCell>
                                     <TableCell>{row.outstanding_balance}</TableCell>
+                                    <TableCell onClick={(e) => e.stopPropagation()}>
+                                        <Stack direction="row" spacing={1}>
+                                            <IconButton
+                                                color="primary"
+                                                sx={{
+                                                    border: "1px solid"
+                                                }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEditClick(row);
+                                                }}                                                           >
+                                                <MdEdit />
+                                            </IconButton>
+                                            <IconButton
+                                                color="error"
+                                                sx={{
+                                                    border: "1px solid"
+                                                }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteClick(row.id);
+                                                }}
+                                            >
+                                                <MdDelete />
+                                            </IconButton>
+                                        </Stack>
+                                    </TableCell>
                                 </TableRow>
                             );
                         })}
@@ -441,6 +513,11 @@ const Merchants = () => {
                                 <TableCell colSpan={6} />
                             </TableRow>
                         )}
+                        <UpdateMerchant
+                            open={isUpdateModalOpen}
+                            onClose={handleCloseUpdateModal}
+                            merchantData={selectedMerchant || undefined}
+                        />
                     </TableBody>
                     <TableFooter>
                         <TableRow>
@@ -465,6 +542,33 @@ const Merchants = () => {
                     </TableFooter>
                 </Table>
             </TableContainer>
+            {/* Confirmation Dialog */}
+            <Dialog open={openDeleteModal} onClose={handleClose}>
+                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to delete this item? This action cannot be undone.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary" variant='contained' sx={{
+                        boxShadow: "none",
+                        ":hover": {
+                            boxShadow: "none"
+                        }
+                    }}>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleConfirmDelete} color="error" variant='contained' sx={{
+                        boxShadow: "none",
+                        ":hover": {
+                            boxShadow: "none"
+                        }
+                    }}>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Paper>)
 }
 

@@ -1,9 +1,18 @@
 import React from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton } from '@mui/material';
 import { useFormik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
-import { MdAddCircleOutline } from 'react-icons/md';
-import { IoClose } from 'react-icons/io5';
+import {
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    TextField,
+    Button,
+    Box,
+    Snackbar,
+    Alert,
+    Grid,
+} from '@mui/material';
 
 // Define the types for the component props
 interface AddCategoryModalProps {
@@ -25,6 +34,9 @@ const validationSchema = Yup.object({
 });
 
 const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, handleClose, onAddCategory }) => {
+    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+    const [successMessage, setSuccessMessage] = React.useState('');
+
     const formik = useFormik<CategoryValues>({
         initialValues: {
             name: '',
@@ -32,61 +44,76 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, handleClose, 
         validationSchema,
         onSubmit: (values: CategoryValues, { resetForm }: FormikHelpers<CategoryValues>) => {
             onAddCategory(values);
+            setSuccessMessage('Category added successfully!');
+            setSnackbarOpen(true);
             resetForm();
             handleClose();
         },
     });
 
+    const handleSnackbarClose = () => {
+        setSnackbarOpen(false);
+    };
+
     return (
-        <Modal open={open} onClose={handleClose}>
-            <Box
-                sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 400,
-                    bgcolor: 'background.paper',
-                    boxShadow: 24,
-                    p: 4,
-                    borderRadius: 2,
-                }}
-            >
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6" component="h2">
-                        Add New Category
-                    </Typography>
-                    <IconButton onClick={handleClose}>
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+            <DialogTitle>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                    Add New Category
+                    {/* <IconButton onClick={handleClose}>
                         <IoClose />
-                    </IconButton>
+                    </IconButton> */}
                 </Box>
-                <form onSubmit={formik.handleSubmit}>
-                    <TextField
-                        fullWidth
-                        id="name"
-                        name="name"
-                        label="Category Name"
-                        variant="outlined"
-                        margin="normal"
-                        value={formik.values.name}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        error={formik.touched.name && Boolean(formik.errors.name)}
-                        helperText={formik.touched.name && formik.errors.name}
-                    />
-                    <Box display="flex" justifyContent="flex-end" mt={2}>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            startIcon={<MdAddCircleOutline />}
-                        >
-                            Add Category
-                        </Button>
-                    </Box>
-                </form>
-            </Box>
-        </Modal>
+            </DialogTitle>
+            <DialogContent>
+                <Box component="form" onSubmit={formik.handleSubmit} noValidate sx={{ mt: 2 }}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                id="name"
+                                name="name"
+                                label="Category Name"
+                                variant="outlined"
+                                value={formik.values.name}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                error={formik.touched.name && Boolean(formik.errors.name)}
+                                helperText={formik.touched.name && formik.errors.name}
+                            />
+                        </Grid>
+                    </Grid>
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleClose} color="error" variant="outlined">
+                    Cancel
+                </Button>
+                <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    onClick={formik.handleSubmit as never}
+                    sx={{
+                        boxShadow: "none",
+                        ":hover": {
+                            boxShadow: "none",
+                        },
+                    }}
+                >
+                    Add Category
+                </Button>
+            </DialogActions>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleSnackbarClose}
+            >
+                <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+                    {successMessage}
+                </Alert>
+            </Snackbar>
+        </Dialog>
     );
 };
 

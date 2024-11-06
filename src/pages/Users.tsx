@@ -18,7 +18,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { visuallyHidden } from '@mui/utils';
 import { users } from "./../data/users.json";
 import { CSVLink } from "react-csv";
-import { Button, FormControl, Menu, MenuItem, Stack, TableFooter, TextField } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Menu, MenuItem, Stack, TableFooter, TextField } from '@mui/material';
 import { BiImport } from 'react-icons/bi';
 import { FaArchive, FaEdit, FaRegEdit, FaTrash } from "react-icons/fa";
 import { blue, green, red } from '@mui/material/colors';
@@ -28,9 +28,10 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import { useTheme } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
+import { MdDelete, MdEdit } from 'react-icons/md';
 
 interface User {
-    id: string;
+    id: number;
     name: string;
     email: string;
     phone: string;
@@ -68,6 +69,7 @@ interface HeadCell {
 }
 
 const headCells: readonly HeadCell[] = [
+    { id: 'id', numeric: false, disablePadding: false, label: 'ID' },
     { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
     { id: 'email', numeric: false, disablePadding: false, label: 'Email' },
     { id: 'phone', numeric: false, disablePadding: false, label: 'Phone' },
@@ -122,6 +124,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                         </TableSortLabel>
                     </TableCell>
                 ))}
+                <TableCell>
+                    Actions
+                </TableCell>
             </TableRow>
         </TableHead>
     );
@@ -322,10 +327,26 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
 const Users = () => {
     const [order, setOrder] = React.useState<Order>('asc');
     const [orderBy, setOrderBy] = React.useState<keyof User>('id');
-    const [selected, setSelected] = React.useState<readonly string[]>([]);
+    const [selected, setSelected] = React.useState<readonly number[]>([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
+    const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
+    const [rowToDelete, setRowToDelete] = React.useState<number | null>(null);
 
+    const handleDeleteClick = (rowId: number) => {
+        setRowToDelete(rowId);
+        setOpenDeleteModal(true);
+    };
+
+    const handleClose = () => {
+        setOpenDeleteModal(false);
+        setRowToDelete(null);
+    };
+
+    const handleConfirmDelete = () => {
+        console.log("Deleted row with ID:", rowToDelete);
+        handleClose();
+    };
     const handleRequestSort = (
         _event: React.MouseEvent<unknown>,
         property: keyof User,
@@ -344,9 +365,9 @@ const Users = () => {
         setSelected([]);
     };
 
-    const handleClick = (_event: React.MouseEvent<unknown>, id: string) => {
+    const handleClick = (_event: React.MouseEvent<unknown>, id: number) => {
         const selectedIndex = selected.indexOf(id);
-        let newSelected: readonly string[] = [];
+        let newSelected: readonly number[] = [];
 
         if (selectedIndex === -1) {
             newSelected = newSelected.concat(selected, id);
@@ -407,7 +428,6 @@ const Users = () => {
                             return (
                                 <TableRow
                                     hover
-                                    onClick={(event) => handleClick(event, row.id)}
                                     role="checkbox"
                                     aria-checked={isItemSelected}
                                     tabIndex={-1}
@@ -417,16 +437,43 @@ const Users = () => {
                                     <TableCell padding="checkbox">
                                         <Checkbox
                                             color="primary"
+                                            onClick={(event) => handleClick(event, row.id)}
                                             checked={isItemSelected}
                                             inputProps={{ 'aria-labelledby': labelId }}
                                         />
                                     </TableCell>
-                                    <TableCell>
-                                        {row.name}
-                                    </TableCell>
+                                    <TableCell>{row.id}</TableCell>
+                                    <TableCell>{row.name}</TableCell>
                                     <TableCell>{row.email}</TableCell>
                                     <TableCell>{row.phone}</TableCell>
                                     <TableCell>{row.role}</TableCell>
+                                    <TableCell onClick={(e) => e.stopPropagation()}>
+                                        <Stack direction="row" spacing={1}>
+                                            <IconButton
+                                                component={Link}
+                                                to={`/users/${row.id}/update`}
+                                                color="primary"
+                                                sx={{
+                                                    border: "1px solid"
+                                                }}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <MdEdit />
+                                            </IconButton>
+                                            <IconButton
+                                                color="error"
+                                                sx={{
+                                                    border: "1px solid"
+                                                }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteClick(row.id);
+                                                }}
+                                            >
+                                                <MdDelete />
+                                            </IconButton>
+                                        </Stack>
+                                    </TableCell>
                                 </TableRow>
                             );
                         })}
@@ -459,6 +506,33 @@ const Users = () => {
                     </TableFooter>
                 </Table>
             </TableContainer>
+            {/* Confirmation Dialog */}
+            <Dialog open={openDeleteModal} onClose={handleClose}>
+                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to delete this item? This action cannot be undone.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary" variant='contained' sx={{
+                        boxShadow: "none",
+                        ":hover": {
+                            boxShadow: "none"
+                        }
+                    }}>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleConfirmDelete} color="error" variant='contained' sx={{
+                        boxShadow: "none",
+                        ":hover": {
+                            boxShadow: "none"
+                        }
+                    }}>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Paper>)
 }
 
